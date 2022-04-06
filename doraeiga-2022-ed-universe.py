@@ -11,8 +11,6 @@ star = Shape.star(5, 4, 10)
 rand_radius = random.uniform(6, 17)
 circle = Shape.ellipse(rand_radius, rand_radius)
 
-print(Convert.alpha_dec_to_ass(int(255)))
-
 
 def romaji(line: Line, l: Line):
     for syl in Utils.all_non_empty(line.syls):
@@ -35,7 +33,6 @@ def romaji(line: Line, l: Line):
         l.layer = 1
         FU = FrameUtility(line.start_time + syl.start_time,
                           line.start_time + syl.end_time)
-        rand = random.uniform(-10, 10)
 
         rand_dot_scale = random.uniform(80, 300)
 
@@ -47,17 +44,6 @@ def romaji(line: Line, l: Line):
             fsc += FU.add(0, syl.duration / 3, 20)
             fsc += FU.add(syl.duration / 3, syl.duration, -20)
 
-            dot_fsc = 100
-            dot_fsc += FU.add(0, syl.duration, rand_dot_scale)
-
-            # Starts at fully invisible => fully visible => invisible again
-            dot_alpha = 255
-            dot_alpha += FU.add(0, syl.duration / 3, -255)
-            dot_alpha += FU.add(syl.duration / 3, syl.duration, 255)
-            dot_alpha = Convert.alpha_dec_to_ass(int(dot_alpha))
-
-            random_initial_shape_size = random.uniform(80, 140)
-
             l.text = "{\\an5\\pos(%.3f, %.3f)\\fscy%.3f}%s" % (
                 syl.center,
                 syl.middle,
@@ -67,22 +53,46 @@ def romaji(line: Line, l: Line):
 
             io.write_line(l)
 
-            # Move the circle inside
-            l.text = (
-                "{\\an5\\pos(%.3f, %.3f)\\fscx%.3f\\fscy%.3f\\alpha%s\\1c&H0000FF&\\bord3\\clip(%s)\\p1}%s"
-                % (
-                    syl.center + rand,
-                    syl.middle + rand,
-                    dot_fsc,
-                    dot_fsc,
-                    dot_alpha,
-                    Convert.text_to_clip(syl, an=5),
-                    circle,
-                )
-            )
-            io.write_line(l)
+        # Create random growing dots
+        number_of_dots = 2
 
-        io.write_line(l)
+        for di in range(0, number_of_dots):
+            offset_x1 = syl.center + random.randrange(-16, 16)
+            offset_y1 = syl.middle + random.randrange(-20, 20)
+
+            for s, e, i, n in FU:
+                l.start_time = s
+                l.end_time = e
+
+                # Text scaling for reference
+                fsc = 100
+                fsc += FU.add(0, syl.duration / 3, 20)
+                fsc += FU.add(syl.duration / 3, syl.duration, -20)
+
+                dot_fsc = 100
+                dot_fsc += FU.add(0, syl.duration, rand_dot_scale)
+
+                # Starts at fully invisible => fully visible => invisible again``
+                dot_alpha = 255
+                dot_alpha += FU.add(0, syl.duration / 3, -255)
+                dot_alpha += FU.add(syl.duration / 3, syl.duration, 255)
+                dot_alpha = Convert.alpha_dec_to_ass(int(dot_alpha))
+
+                l.actor = "eee"
+
+                l.text = (
+                    "{\\an5\\pos(%.3f, %.3f)\\fscx%.3f\\fscy%.3f\\alpha%s\\1c&H0000FF&\\bord3\\clip(%s)\\p1}%s"
+                    % (
+                        offset_x1,  # syl.center + rand,
+                        offset_y1,  # syl.middle + rand,
+                        dot_fsc,
+                        dot_fsc,
+                        dot_alpha,
+                        Convert.text_to_clip(syl, an=5, fscx=fsc, fscy=fsc),
+                        circle,
+                    )
+                )
+                io.write_line(l)
 
         # Leadout
         l.start_time = line.start_time + syl.end_time
