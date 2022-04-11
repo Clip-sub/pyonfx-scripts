@@ -149,7 +149,45 @@ def romaji(line: Line, l: Line):
 
 
 def kanji(line: Line, l: Line):
+    l.layer = 0
     l.text = ""
+
+    l.start_time = line.start_time
+    l.end_time = line.end_time
+    l.text = "{\\an5\\pos(%.3f, %.3f)}%s" % (
+        line.center,
+        line.middle,
+        line.text
+    )
+
+    io.write_line(l)
+
+    # local clip_rand = string.format("%.3f,%.3f,%.3f,%.3f",
+    #     rand_x, rand_y, rand_x, rand_y)
+    # local clip_orig = string.format("%.3f,%.3f,%.3f,%.3f",
+    #     char.left-mar, char.top-mar, char.right+mar, char.bottom+mar)
+
+    # local delay = 550
+
+    # local n = 10
+    # for i=0, n do
+    #     local fr = i/n
+    #     local smooth = 100
+
+    #     l.start_time = line.start_time + 60*(char.i-1) - delay - smooth + smooth*fr
+    #     l.end_time = l.start_time + delay
+    #     l.dur = l.end_time - l.start_time
+    #     l.layer = 1
+
+    #     l.text = string.format("{\\an5\\pos(%.3f,%.3f)\\clip(%s)\\t(0,%d,0.5,\\clip(%s))\\fad(50,150)}%s",
+    #     char.center, char.middle,
+    #     clip_rand,
+    #     delay, clip_orig,
+    #     char.text
+    #     )
+
+    #     io.write_line(l)
+    # end
     return
 
 
