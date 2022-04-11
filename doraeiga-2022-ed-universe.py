@@ -1,3 +1,4 @@
+import math
 from pyonfx import *
 import random
 
@@ -12,14 +13,14 @@ star = Shape.star(5, 4, 10)
 rand_radius = random.uniform(6, 17)
 circle = Shape.ellipse(rand_radius, rand_radius)
 
-COLOR_CRIMSON = "#301F1F"
-COLOR_YELLOW = "#41430A"
-COLOR_GREEN = "#03490E"
-COLOR_BLUE = "#005989"
-COLOR_DARK_BLUE = "#152B75"
-COLOR_VIOLET = "#351575"
-COLOR_DARK_PINK = "#570663"
-COLOR_APPLE = "#8D0031"
+COLOR_CRIMSON = "#BE6C6C"
+COLOR_YELLOW = "#E6CD80"
+COLOR_GREEN = "#8DEE9C"
+COLOR_BLUE = "#98D5F4"
+COLOR_DARK_BLUE = "#869FED"
+COLOR_VIOLET = "#AF96E5"
+COLOR_DARK_PINK = "#E099EC"
+COLOR_APPLE = "#D391A8"
 
 
 def romaji(line: Line, l: Line):
@@ -38,43 +39,53 @@ def romaji(line: Line, l: Line):
     )
 
     for syl in Utils.all_non_empty(line.syls):
+        delay = 300
 
         # Leadin
-        l.start_time = line.start_time - line.leadin / 2
+        l.start_time = line.start_time + 25 * syl.i - delay - 80
         l.end_time = line.start_time + syl.start_time
         l.duration = l.end_time - l.start_time
 
         l.text = (
-            "{\\an5\\pos(%.3f, %.3f)}%s"
+            "{\\an5\\move(%.3f, %.3f, %.3f, %.3f, 0, %d)\\fad(%d, 0)}%s"
         ) % (
             syl.center,
+            syl.middle - 20,
+            syl.center,
             syl.middle,
+            delay,
+            delay,
             syl.text
         )
 
         io.write_line(l)
 
-        # Main Effect
+        # Main Effect 1 - Scale
         l.layer = 1
+        l.start_time = line.start_time + syl.start_time
+        l.end_time = line.start_time + syl.end_time
+        l.duration = l.end_time - l.start_time
+
+        l.text = "{\\an5\\pos(%f, %f)\\t(0, %f,\\fscy125\\1c%s)\\t(%f, %f,\\fscy100\\1c%s)}%s" % (
+            syl.center,
+            syl.middle,
+            syl.duration / 3,
+            Convert.color_rgb_to_ass(random_color),
+            syl.duration / 3,
+            syl.duration,
+            line.styleref.color1,
+            syl.text
+        )
+
+        io.write_line(l)
+
+        # Main Effect 2 - Create random growing dots
+        number_of_dots = 2
+
         FU = FrameUtility(line.start_time + syl.start_time,
                           line.start_time + syl.end_time)
 
         rand_dot_scale = random.uniform(80, 300)
-
-        fsc = 120
-        l.text = "{\\an5\\pos(%.3f, %.3f)\\fscy%.3f\\1c%s\\1a%s}%s" % (
-            syl.center,
-            syl.middle,
-            fsc,
-            Convert.color_rgb_to_ass(random_color),
-            Convert.alpha_dec_to_ass(250),
-            syl.text
-        )
-
-        io.write_line(l)
-
-        # Create random growing dots
-        number_of_dots = 2
 
         for di in range(0, number_of_dots):
             offset_x1 = syl.center + random.randrange(-16, 16)
@@ -115,11 +126,22 @@ def romaji(line: Line, l: Line):
                 io.write_line(l)
 
         # Leadout
+        off_x = 35
+        off_y = 15
+
         l.start_time = line.start_time + syl.end_time
-        l.end_time = line.end_time + line.leadout / 2
-        l.text = "{\\an5\\pos(%.3f, %.3f)}%s" % (
+        l.end_time = line.end_time - 25 * \
+            (len(line.syls) - syl.i) + delay
+        l.duration = l.end_time - l.start_time
+
+        l.text = "{\\an5\\move(%.3f, %.3f, %.3f, %.3f, %d, %d)\\fad(0, %d)}%s" % (
             syl.center,
             syl.middle,
+            syl.center + math.cos(syl.i / 2) * off_x,
+            syl.middle + math.sin(syl.i / 4) * off_y,
+            l.duration - delay,
+            l.duration,
+            delay,
             syl.text
         )
 
