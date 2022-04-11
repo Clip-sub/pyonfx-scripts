@@ -87,7 +87,7 @@ def romaji(line: Line, l: Line):
 
         rand_dot_scale = random.uniform(80, 300)
 
-        for di in range(0, number_of_dots):
+        for dot_index in range(0, number_of_dots):
             offset_x1 = syl.center + random.randrange(-16, 16)
             offset_y1 = syl.middle + random.randrange(-20, 20)
 
@@ -161,7 +161,7 @@ for line in lines:
     # Generating lines
     if line.style == "Romaji":
         romaji(line, line.copy())
-    elif line.styleref.alignment >= 4:
+    elif line.style == "Kanji":
         kanji(line, line.copy())
     else:
         sub(line, line.copy())
