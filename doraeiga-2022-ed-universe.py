@@ -1,6 +1,7 @@
 from pyonfx import *
 import random
 
+# https://pyonfx.readthedocs.io/en/latest/
 io = Ass("D:\\Videos\\Doraeiga 2021\\Universe - Official HigeDANdism.ass")
 io.path_output = "D:\\Videos\\Doraeiga 2021\\gen.ass"
 meta, styles, lines = io.get_data()
@@ -11,9 +12,33 @@ star = Shape.star(5, 4, 10)
 rand_radius = random.uniform(6, 17)
 circle = Shape.ellipse(rand_radius, rand_radius)
 
+COLOR_CRIMSON = "#301F1F"
+COLOR_YELLOW = "#41430A"
+COLOR_GREEN = "#03490E"
+COLOR_BLUE = "#005989"
+COLOR_DARK_BLUE = "#152B75"
+COLOR_VIOLET = "#351575"
+COLOR_DARK_PINK = "#570663"
+COLOR_APPLE = "#8D0031"
+
 
 def romaji(line: Line, l: Line):
+    # Random color per line
+    random_color = random.choice(
+        [
+            COLOR_CRIMSON,
+            COLOR_YELLOW,
+            COLOR_GREEN,
+            COLOR_BLUE,
+            COLOR_DARK_BLUE,
+            COLOR_VIOLET,
+            COLOR_DARK_PINK,
+            COLOR_APPLE
+        ]
+    )
+
     for syl in Utils.all_non_empty(line.syls):
+
         # Leadin
         l.start_time = line.start_time - line.leadin / 2
         l.end_time = line.start_time + syl.start_time
@@ -36,22 +61,17 @@ def romaji(line: Line, l: Line):
 
         rand_dot_scale = random.uniform(80, 300)
 
-        for s, e, i, n in FU:
-            l.start_time = s
-            l.end_time = e
+        fsc = 120
+        l.text = "{\\an5\\pos(%.3f, %.3f)\\fscy%.3f\\1c%s\\1a%s}%s" % (
+            syl.center,
+            syl.middle,
+            fsc,
+            Convert.color_rgb_to_ass(random_color),
+            Convert.alpha_dec_to_ass(250),
+            syl.text
+        )
 
-            fsc = 100
-            fsc += FU.add(0, syl.duration / 3, 20)
-            fsc += FU.add(syl.duration / 3, syl.duration, -20)
-
-            l.text = "{\\an5\\pos(%.3f, %.3f)\\fscy%.3f}%s" % (
-                syl.center,
-                syl.middle,
-                fsc,
-                syl.text
-            )
-
-            io.write_line(l)
+        io.write_line(l)
 
         # Create random growing dots
         number_of_dots = 2
@@ -73,21 +93,21 @@ def romaji(line: Line, l: Line):
                 dot_fsc += FU.add(0, syl.duration, rand_dot_scale)
 
                 # Starts at fully invisible => fully visible => invisible again``
-                dot_alpha = 255
-                dot_alpha += FU.add(0, syl.duration / 3, -255)
-                dot_alpha += FU.add(syl.duration / 3, syl.duration, 255)
+                scale = 120
+                dot_alpha = scale
+                dot_alpha += FU.add(0, syl.duration / 3, -scale)
+                dot_alpha += FU.add(syl.duration / 3, syl.duration, scale)
                 dot_alpha = Convert.alpha_dec_to_ass(int(dot_alpha))
 
-                l.actor = "eee"
-
                 l.text = (
-                    "{\\an5\\pos(%.3f, %.3f)\\fscx%.3f\\fscy%.3f\\alpha%s\\1c&H0000FF&\\bord3\\clip(%s)\\p1}%s"
+                    "{\\an5\\pos(%.3f, %.3f)\\fscx%.3f\\fscy%.3f\\alpha%s\\1c%s\\bord3\\clip(%s)\\p1}%s"
                     % (
                         offset_x1,  # syl.center + rand,
                         offset_y1,  # syl.middle + rand,
                         dot_fsc,
                         dot_fsc,
                         dot_alpha,
+                        Convert.color_rgb_to_ass(random_color),
                         Convert.text_to_clip(syl, an=5, fscx=fsc, fscy=fsc),
                         circle,
                     )
