@@ -13,9 +13,11 @@ star = Shape.star(5, 4, 10)
 rand_radius = random.uniform(6, 17)
 circle = Shape.ellipse(rand_radius, rand_radius)
 
+COLOR_GREY = "#8F8F8F"
 COLOR_CRIMSON = "#BE6C6C"
 COLOR_YELLOW = "#E6CD80"
 COLOR_GREEN = "#8DEE9C"
+COLOR_AZURE = "#6BE5D7"
 COLOR_BLUE = "#98D5F4"
 COLOR_DARK_BLUE = "#869FED"
 COLOR_VIOLET = "#AF96E5"
@@ -27,9 +29,11 @@ def romaji(line: Line, l: Line):
     # Random color per line
     random_color = random.choice(
         [
+            COLOR_GREY,
             COLOR_CRIMSON,
             COLOR_YELLOW,
             COLOR_GREEN,
+            COLOR_AZURE,
             COLOR_BLUE,
             COLOR_DARK_BLUE,
             COLOR_VIOLET,
@@ -149,18 +153,59 @@ def romaji(line: Line, l: Line):
 
 
 def kanji(line: Line, l: Line):
-    l.layer = 0
-    l.text = ""
+    for syl in Utils.all_non_empty(line.syls):
+        l.layer = 0
 
-    l.start_time = line.start_time
-    l.end_time = line.end_time
-    l.text = "{\\an5\\pos(%.3f, %.3f)}%s" % (
-        line.center,
-        line.middle,
-        line.text
-    )
+        l.start_time = line.start_time
+        l.end_time = line.end_time
+        l.text = "{\\an5\\alpha&HFF&\\pos(%.3f, %.3f)}%s" % (
+            line.center,
+            line.middle,
+            line.text
+        )
 
-    io.write_line(l)
+        io.write_line(l)
+
+        rand_x = random.randrange(syl.left, syl.right, 1)
+        rand_y = random.randrange(syl.top, syl.bottom, 1)
+
+        padding = 10
+
+        clip_rand = "%.3f, %.3f, %.3f, %.3f" % (
+            rand_x,
+            rand_y,
+            rand_x,
+            rand_y
+        )
+        clip_orig = "%.3f, %.3f, %.3f, %.3f" % (
+            syl.left - padding,
+            syl.top - padding,
+            syl.right + padding,
+            syl.bottom + padding
+        )
+
+        delay = 550
+        n = 10
+
+        for i in range(n):
+            fr = i / n
+            smooth = 100
+
+            l.start_time = line.start_time + 60 * \
+                (syl.i - 1) - delay - smooth + smooth * fr
+            l.end_time = l.end_time + l.leadout / 2
+            l.duration = l.end_time - l.start_time
+            l.layer = 0
+
+            l.text = "{\\an5\\pos(%.3f, %.3f)\\clip(%s)\\t(0, %d, 0.5,\\clip(%s))%s}" % (
+                syl.center,
+                syl.middle,
+                clip_rand,
+                delay,
+                clip_orig,
+                syl.text
+            )
+            io.write_line(l)
 
     # local clip_rand = string.format("%.3f,%.3f,%.3f,%.3f",
     #     rand_x, rand_y, rand_x, rand_y)
