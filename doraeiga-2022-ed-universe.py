@@ -3,8 +3,8 @@ from pyonfx import *
 import random
 
 # https://pyonfx.readthedocs.io/en/latest/
-io = Ass("D:\\Videos\\Doraeiga 2021\\Universe - Official HigeDANdism.ass")
-io.path_output = "D:\\Videos\\Doraeiga 2021\\gen.ass"
+io = Ass("Universe - Official HigeDANdism.ass")
+io.path_output = "gen.ass"
 meta, styles, lines = io.get_data()
 
 # Creating the star and extracting all the color changes from the input file
@@ -185,4 +185,4 @@ for line in lines:
         sub(line, line.copy())
 
 io.save()
-io.open_mpv("D:\\Videos\\Doraeiga 2021\\gen.mp4", "00:52")
+io.open_mpv("gen.mp4", "00:52")
