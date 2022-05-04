@@ -160,9 +160,9 @@ def kanji(line: Line, l: Line):
 
     for i in range(n):
         l.text = "{\\fad(200, 200)\\pos(%.3f, %.3f)\\alpha%s}%s" % (
-            l.center + 3,
-            l.middle + 3,
-            Convert.alpha_dec_to_ass(220),
+            l.center + 2*i,
+            l.middle + 2*i,
+            Convert.alpha_dec_to_ass(235),
             l.text
         )
 
